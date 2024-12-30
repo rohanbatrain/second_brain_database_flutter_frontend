@@ -39,16 +39,16 @@ class LoginScreenState extends State<LoginScreen> {
     if (response.statusCode == 200) {
       final responseBody = json.decode(response.body);
       final token = responseBody['token'];
-      final isAdmin = responseBody['is_admin'];
+      final role = responseBody['role'];
 
       if (token != null) {
-        // Save the token and is_admin to SharedPreferences
+        // Save the token and role to SharedPreferences
         await prefs.setString('auth_token', token);
-        await prefs.setBool('is_admin', isAdmin);
+        await prefs.setString('role', role);
 
         // Navigate to the appropriate home screen after successful login
         if (mounted) {
-          if (isAdmin) {
+          if (role == 'admin') {
             Navigator.pushReplacementNamed(context, '/admin_home');
           } else {
             Navigator.pushReplacementNamed(context, '/home');
@@ -73,9 +73,9 @@ class LoginScreenState extends State<LoginScreen> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           final prefs = snapshot.data;
-          final isAdmin = prefs?.getBool('is_admin') ?? false;
+          final role = prefs?.getString('role') ?? '';
 
-          if (isAdmin) {
+          if (role == 'admin') {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pushReplacementNamed(context, '/admin_home');
             });
