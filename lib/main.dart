@@ -5,6 +5,7 @@ import 'screens/auth/register_screen.dart';
 import 'screens/auth/login_screen.dart' as login; // Import the login screen with a prefix
 import 'screens/home_screen.dart'; // This is a screen you should create for after login
 import 'screens/admin/admin_home_screen.dart'; // Import the admin home screen
+import 'screens/auth/logout_screen.dart'; // Import the logout screen
 
 void main() {
   runApp(MyApp());
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomeScreen(), // After login, the user is directed to this screen
         '/backend_url': (context) => BackendUrlScreen(), // Add this route
         '/admin_home': (context) => AdminHomeScreen(), // Add this route
+        '/logout': (context) => LogoutScreen(), // Add this route
       },
     );
   }
