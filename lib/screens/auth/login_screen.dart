@@ -78,7 +78,9 @@ class LoginScreenState extends State<LoginScreen> {
 
           if (role == 'admin') {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.pushReplacementNamed(context, '/admin_home');
+              if (mounted) {
+                Navigator.pushReplacementNamed(context, '/admin_home');
+              }
             });
           }
         }

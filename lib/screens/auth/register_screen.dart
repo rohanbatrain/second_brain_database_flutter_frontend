@@ -47,34 +47,7 @@ class RegisterScreenState extends State<RegisterScreen> {
       });
       // Show success dialog with countdown
       int countdown = 5;
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return AlertDialog(
-                title: Text('Registration Successful'),
-                content: Text('Redirecting to login screen in $countdown seconds...'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/login');
-                    },
-                    child: Text('Redirect Now'),
-                  ),
-                ],
-              );
-            },
-          );
-        },
-      );
-      // Countdown timer
-      for (int i = 0; i < 5; i++) {
-        await Future.delayed(Duration(seconds: 1));
-        setState(() {
-          countdown--;
-        });
-        // Update the dialog content with the new countdown value
+      if (mounted) {
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -96,6 +69,37 @@ class RegisterScreenState extends State<RegisterScreen> {
             );
           },
         );
+      }
+      // Countdown timer
+      for (int i = 0; i < 5; i++) {
+        await Future.delayed(Duration(seconds: 1));
+        setState(() {
+          countdown--;
+        });
+        // Update the dialog content with the new countdown value
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return StatefulBuilder(
+                builder: (context, setState) {
+                  return AlertDialog(
+                    title: Text('Registration Successful'),
+                    content: Text('Redirecting to login screen in $countdown seconds...'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacementNamed(context, '/login');
+                        },
+                        child: Text('Redirect Now'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          );
+        }
       }
       // Navigate to Login screen after successful registration
       if (mounted) {
