@@ -1,16 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AdminHomeScreen extends StatelessWidget {
+class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});
 
-  Future<void> _resetBackendUrl(BuildContext context) async {
+  @override
+  AdminHomeScreenState createState() => AdminHomeScreenState();
+}
+
+class AdminHomeScreenState extends State<AdminHomeScreen> {
+  String _adminData = 'Loading...';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAdminData();
+  }
+
+  Future<void> _loadAdminData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final adminData = prefs.getString('admin_data') ?? 'No data available';
+    if (!mounted) return;
+
+    setState(() {
+      _adminData = adminData;
+    });
+  }
+
+  Future<void> _resetBackendUrl() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('backend_url');
+    if (!mounted) return;
+
+    _navigateToBackendUrlScreen();
+  }
+
+  void _navigateToBackendUrlScreen() {
     Navigator.pushNamedAndRemoveUntil(context, '/backend_url', (route) => false);
   }
 
-  Future<void> _showResetBackendUrlConfirmationDialog(BuildContext context) async {
+  Future<void> _showResetBackendUrlConfirmationDialog() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -33,9 +62,9 @@ class AdminHomeScreen extends StatelessWidget {
             ),
             TextButton(
               child: Text('Reset URL'),
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                _resetBackendUrl(context);
+                await _resetBackendUrl();
               },
             ),
           ],
@@ -58,7 +87,7 @@ class AdminHomeScreen extends StatelessWidget {
               if (result == 'logout') {
                 Navigator.pushNamed(context, '/logout');
               } else if (result == 'reset_backend_url') {
-                _showResetBackendUrlConfirmationDialog(context);
+                _showResetBackendUrlConfirmationDialog();
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -75,7 +104,7 @@ class AdminHomeScreen extends StatelessWidget {
         ],
       ),
       body: Center(
-        child: Text('Hello, Admin!'),
+        child: Text(_adminData),
       ),
     );
   }

@@ -11,8 +11,38 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  MyAppState createState() => MyAppState();
+}
+
+class MyAppState extends State<MyApp> {
+  Widget _initialScreen = Center(child: CircularProgressIndicator());
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfBackendUrlSaved();
+  }
+
+  Future<void> _checkIfBackendUrlSaved() async {
+    final prefs = await SharedPreferences.getInstance();
+    final backendUrl = prefs.getString('backend_url');
+    final authToken = prefs.getString('auth_token');
+    if (!mounted) return;
+
+    setState(() {
+      if (backendUrl == null || backendUrl.isEmpty) {
+        _initialScreen = BackendUrlScreen();  // Ask user to input backend URL
+      } else if (authToken != null && authToken.isNotEmpty) {
+        _initialScreen = HomeScreen();  // Go to home screen if token is saved
+      } else {
+        _initialScreen = RegisterScreen();  // Go to register screen if no token is saved
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,36 +53,13 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => _checkIfBackendUrlSaved(),
+        '/': (context) => _initialScreen,
         '/login': (context) => login.LoginScreen(), // Add this route
         '/register': (context) => RegisterScreen(),
         '/home': (context) => HomeScreen(), // After login, the user is directed to this screen
         '/backend_url': (context) => BackendUrlScreen(), // Add this route
         '/admin_home': (context) => AdminHomeScreen(), // Add this route
         '/logout': (context) => LogoutScreen(), // Add this route
-      },
-    );
-  }
-
-  // Checks if the backend URL and token are saved and navigates accordingly
-  Widget _checkIfBackendUrlSaved() {
-    return FutureBuilder<SharedPreferences>(
-      future: SharedPreferences.getInstance(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else {
-          final prefs = snapshot.data;
-          final backendUrl = prefs?.getString('backend_url');
-          final authToken = prefs?.getString('auth_token');
-          if (backendUrl == null || backendUrl.isEmpty) {
-            return BackendUrlScreen();  // Ask user to input backend URL
-          } else if (authToken != null && authToken.isNotEmpty) {
-            return HomeScreen();  // Go to home screen if token is saved
-          } else {
-            return RegisterScreen();  // Go to register screen if no token is saved
-          }
-        }
       },
     );
   }

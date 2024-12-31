@@ -33,6 +33,7 @@ class LoginScreenState extends State<LoginScreen> {
       body: json.encode({
         'email': email,
         'password': password,
+        'client': 'flutter_frontend',
       }),
     );
 

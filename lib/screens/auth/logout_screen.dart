@@ -8,6 +8,7 @@ class LogoutScreen extends StatelessWidget {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
     await prefs.remove('role');
+    if (!context.mounted) return;
     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
   }
 

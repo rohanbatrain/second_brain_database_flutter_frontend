@@ -14,9 +14,10 @@ class RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _usernameController = TextEditingController();
   String _errorMessage = '';
 
-  Future<void> _register(String email, String password) async {
+  Future<void> _register(String email, String password, String username) async {
     final prefs = await SharedPreferences.getInstance();
     final backendUrl = prefs.getString('backend_url');
 
@@ -34,10 +35,68 @@ class RegisterScreenState extends State<RegisterScreen> {
       body: json.encode({
         'email': email,
         'password': password,
+        'username': username,
+        'client': 'flutter_frontend',
       }),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
+      // Clear the error message
+      setState(() {
+        _errorMessage = '';
+      });
+      // Show success dialog with countdown
+      int countdown = 5;
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: Text('Registration Successful'),
+                content: Text('Redirecting to login screen in $countdown seconds...'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/login');
+                    },
+                    child: Text('Redirect Now'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+      // Countdown timer
+      for (int i = 0; i < 5; i++) {
+        await Future.delayed(Duration(seconds: 1));
+        setState(() {
+          countdown--;
+        });
+        // Update the dialog content with the new countdown value
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return StatefulBuilder(
+              builder: (context, setState) {
+                return AlertDialog(
+                  title: Text('Registration Successful'),
+                  content: Text('Redirecting to login screen in $countdown seconds...'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, '/login');
+                      },
+                      child: Text('Redirect Now'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      }
       // Navigate to Login screen after successful registration
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/login');
@@ -74,6 +133,14 @@ class RegisterScreenState extends State<RegisterScreen> {
               ),
               SizedBox(height: 20),
               TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 20),
+              TextField(
                 controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: 'Password',
@@ -96,9 +163,10 @@ class RegisterScreenState extends State<RegisterScreen> {
                   final email = _emailController.text;
                   final password = _passwordController.text;
                   final confirmPassword = _confirmPasswordController.text;
-                  if (email.isNotEmpty && password.isNotEmpty && confirmPassword.isNotEmpty) {
+                  final username = _usernameController.text;
+                  if (email.isNotEmpty && password.isNotEmpty && confirmPassword.isNotEmpty && username.isNotEmpty) {
                     if (password == confirmPassword) {
-                      _register(email, password);
+                      _register(email, password, username);
                     } else {
                       setState(() {
                         _errorMessage = 'Passwords do not match';

@@ -4,9 +4,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  Future<void> _resetBackendUrl(BuildContext context) async {
+  Future<void> _resetBackendUrl() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('backend_url');
+  }
+
+  void _navigateToBackendUrlScreen(BuildContext context) {
     Navigator.pushNamedAndRemoveUntil(context, '/backend_url', (route) => false);
   }
 
@@ -33,9 +36,11 @@ class HomeScreen extends StatelessWidget {
             ),
             TextButton(
               child: Text('Reset URL'),
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                _resetBackendUrl(context);
+                await _resetBackendUrl();
+                if (!context.mounted) return;
+                _navigateToBackendUrlScreen(context);
               },
             ),
           ],
